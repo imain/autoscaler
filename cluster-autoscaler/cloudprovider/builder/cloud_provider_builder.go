@@ -24,6 +24,7 @@ import (
 	"k8s.io/autoscaler/cluster-autoscaler/cloudprovider/aws"
 	"k8s.io/autoscaler/cluster-autoscaler/cloudprovider/azure"
 	"k8s.io/autoscaler/cluster-autoscaler/cloudprovider/gce"
+	"k8s.io/autoscaler/cluster-autoscaler/cloudprovider/openstack_heat"
 	"k8s.io/autoscaler/cluster-autoscaler/cloudprovider/kubemark"
 	"k8s.io/client-go/informers"
 	kubeclient "k8s.io/client-go/kubernetes"
@@ -40,6 +41,7 @@ var AvailableCloudProviders = []string{
 	azure.ProviderName,
 	gce.ProviderNameGCE,
 	gce.ProviderNameGKE,
+	openstack_heat.ProviderName,
 	kubemark.ProviderName,
 }
 
@@ -83,6 +85,8 @@ func (b CloudProviderBuilder) Build(discoveryOpts cloudprovider.NodeGroupDiscove
 		return b.buildAWS(discoveryOpts, resourceLimiter)
 	case azure.ProviderName:
 		return b.buildAzure(discoveryOpts, resourceLimiter)
+	case openstack_heat.ProviderName:
+		return b.buildOpenstackHeat(discoveryOpts, resourceLimiter)
 	case kubemark.ProviderName:
 		return b.buildKubemark(discoveryOpts, resourceLimiter)
 	case "":
@@ -164,6 +168,26 @@ func (b CloudProviderBuilder) buildAzure(do cloudprovider.NodeGroupDiscoveryOpti
 		glog.Fatalf("Failed to create Azure cloud provider: %v", err)
 	}
 	return provider
+}
+
+func (b CloudProviderBuilder) buildOpenstackHeat(do cloudprovider.NodeGroupDiscoveryOptions, rl *cloudprovider.ResourceLimiter) cloudprovider.CloudProvider {
+    var heatManager *openstack_heat.HeatManager
+    if *cloudConfig != "" {
+        config, fileErr := os.Open(*cloudConfig)
+            if fileErr != nil {
+                glog.Fatalf("Couldn't open cloud provider configuration %s: %#v", *cloudConfig, err)
+            }
+        defer config.Close()
+            heatManager, err = openstack_heat.CreateHeatManager(config)
+            if err != nil {
+                glog.Fatalf("Failed to create Openstack Heat manager: %v", err)
+            }
+    }
+    cloudProvider, err = openstack_heat.BuildOpenstackHeatCloudProvider(heatManager, nodeGroupsFlag)
+    if err != nil {
+        glog.Fatalf("Failed to create Openstack Heat provider: %v", err)
+    }
+    return cloudProvider
 }
 
 func (b CloudProviderBuilder) buildKubemark(do cloudprovider.NodeGroupDiscoveryOptions, rl *cloudprovider.ResourceLimiter) cloudprovider.CloudProvider {
