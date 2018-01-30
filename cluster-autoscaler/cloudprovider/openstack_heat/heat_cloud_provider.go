@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"strings"
 
-	"k8s.io/contrib/cluster-autoscaler/cloudprovider"
-	kube_api "k8s.io/kubernetes/pkg/api"
+	"k8s.io/autoscaler/cluster-autoscaler/cloudprovider"
+    apiv1 "k8s.io/api/core/v1"
 )
 
 type OpenstackHeatProvider struct {
@@ -90,7 +90,7 @@ func (provider *OpenstackHeatProvider) NodeGroups() []cloudprovider.NodeGroup {
 	return result
 }
 
-func (provider *OpenstackHeatProvider) NodeGroupForNode(node *kube_api.Node) (cloudprovider.NodeGroup, error) {
+func (provider *OpenstackHeatProvider) NodeGroupForNode(node *apiv1.Node) (cloudprovider.NodeGroup, error) {
 	id, err := extractInstanceID(node.Spec.ProviderID)
 	if err != nil {
 		return nil, err

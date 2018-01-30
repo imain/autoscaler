@@ -21,7 +21,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/orchestration/v1/stackresources"
 	"github.com/gophercloud/gophercloud/openstack/orchestration/v1/stacks"
 	"gopkg.in/gcfg.v1"
-	"k8s.io/kubernetes/pkg/util/wait"
+    "k8s.io/apimachinery/pkg/util/wait"
 )
 
 const (

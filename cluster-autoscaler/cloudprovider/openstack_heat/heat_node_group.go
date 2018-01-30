@@ -7,7 +7,7 @@ import (
 
 	"github.com/gophercloud/gophercloud/openstack/orchestration/v1/stackresources"
 
-	kube_api "k8s.io/kubernetes/pkg/api"
+    apiv1 "k8s.io/api/core/v1"
 	provider_openstack "k8s.io/kubernetes/pkg/cloudprovider/providers/openstack"
 )
 
@@ -49,7 +49,7 @@ func (resourceGrp *HeatResourceGroup) IncreaseSize(delta int) error {
 	return resourceGrp.heatManager.SetResourceGroupSize(resourceGrp, size+int64(delta))
 }
 
-func (resourceGrp *HeatResourceGroup) DeleteNodes(nodes []*kube_api.Node) error {
+func (resourceGrp *HeatResourceGroup) DeleteNodes(nodes []*apiv1.Node) error {
 	size, err := resourceGrp.heatManager.GetResourceGroupSize(resourceGrp)
 	if err != nil {
 		return fmt.Errorf("error when deleting nodes, retrieving size of group %s failed: %v", resourceGrp.name, err)
@@ -75,7 +75,7 @@ func (resourceGrp *HeatResourceGroup) DeleteNodes(nodes []*kube_api.Node) error 
 	return resourceGrp.heatManager.DeleteInstances(toBeDeleted)
 }
 
-func (resourceGrp *HeatResourceGroup) Contains(node *kube_api.Node) (bool, error) {
+func (resourceGrp *HeatResourceGroup) Contains(node *apiv1.Node) (bool, error) {
 	instanceID, err := extractInstanceID(node.Spec.ProviderID)
 	if err != nil {
 		return false, err
